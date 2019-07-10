@@ -23,7 +23,7 @@
             physics: {
                 default: 'arcade',
                 arcade: {
-                    gravity: { y: 100 },
+                    gravity: { y: 50 },
                     debug: false
                 }
             },
@@ -42,13 +42,14 @@
 
         var THRUST_X = 10;
         var THRUST_Y = 10;
+        var gearStatus = 'down';
 
         function preload() {
             this.load.image('sky', 'assets/sky.png');
             this.load.image('ground', 'assets/platform.png');
             this.load.image('star', 'assets/star.png');
             this.load.image('bomb', 'assets/bomb.png');
-            this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
+            this.load.spritesheet('car', 'assets/geo-metro.png', { frameWidth: 62, frameHeight: 32 });
         }
 
         function create() {
@@ -58,27 +59,47 @@
 
             platforms.create(400, 568, 'ground').setScale(2).refreshBody();
 
-            player = this.physics.add.sprite(100, 450, 'dude');
+            player = this.physics.add.sprite(100, 450, 'car');
 
-            player.setBounce(0.1);
+            player.setBounce(0.5);
             player.setCollideWorldBounds(true);
 
             this.anims.create({
                 key: 'left',
-                frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3 }),
+                frames: this.anims.generateFrameNumbers('car', { start: 1, end: 3 }),
                 frameRate: 10,
                 repeat: -1
             });
 
             this.anims.create({
-                key: 'turn',
-                frames: [{ key: 'dude', frame: 4 }],
+                key: 'gear-up',
+                frames: [{ key: 'car', frame: 0 }],
+                frameRate: 20
+            });
+
+            this.anims.create({
+                key: 'gear-down',
+                frames: [{ key: 'car', frame: 13 }],
                 frameRate: 20
             });
 
             this.anims.create({
                 key: 'right',
-                frames: this.anims.generateFrameNumbers('dude', { start: 5, end: 8 }),
+                frames: this.anims.generateFrameNumbers('car', { start: 10, end: 11 }),
+                frameRate: 10,
+                repeat: -1
+            });
+
+            this.anims.create({
+                key: 'down',
+                frames: this.anims.generateFrameNumbers('car', { start: 4, end: 6 }),
+                frameRate: 10,
+                repeat: -1
+            });
+
+            this.anims.create({
+                key: 'up',
+                frames: this.anims.generateFrameNumbers('car', { start: 7, end: 9 }),
                 frameRate: 10,
                 repeat: -1
             });
@@ -106,15 +127,20 @@
 
                 player.anims.play('right', true);
             }
-            else {
-                player.anims.play('turn');
+            else if (gearStatus === 'down') {
+                player.anims.play('gear-down');
+            }
+            else if (gearStatus === 'up') {
+                player.anims.play('gear-up');
             }
 
             if (cursors.up.isDown) {
 
                 player.setVelocityY(player.body.velocity.y - THRUST_X);
+                player.anims.play('up', true);
             } else if (cursors.down.isDown) {
                 player.setVelocityY(player.body.velocity.y + THRUST_X);
+                player.anims.play('down', true);
             }
 
 
